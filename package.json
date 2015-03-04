@@ -1,0 +1,22 @@
+{
+    "name": "fss-ofs",
+    "version": "0.0.1",
+    "description": "FSS Orbital Federates Simulation",
+    "author": "Paul T. Grogan <ptgrogan@mit.edu>",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ptgrogan/fss-ofs.git"
+    },
+    "licenses": [
+        {
+            "type": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ],
+    "main": "./lib/fss-ofs.js",
+    "dependencies": {
+        "requirejs" : "*",
+        "amdefine": "*",
+        "mas": "*"
+    }
+}
