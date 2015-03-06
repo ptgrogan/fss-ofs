@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
+var requirejs = require('requirejs');
 
-define(function(require) {
-	var fss = require('fss');
-	
+requirejs.config({
+  baseUrl: '../lib',
+  nodeRequire: require
+});
+
+requirejs(['mas','fss-ofs'], function(mas,fss) {	
     function Game() {
 		this.numSectors = 6;
 		this.altitudes = ['LEO', 'MEO', 'GEO'];
@@ -33,12 +34,12 @@ define(function(require) {
 			new fss.Spacecraft{name: "C", cost: 400, maxSize: 6}
 		];
 		this.eventTypes = [
-			{number: 8, event: new fss.Contract(name: "SAR P1", valueSchedule: [[1,500],[4,400],[Infinity,-50]])},
-			{number: 12, event: new fss.Contract(name: "SAR P2", valueSchedule: [[2,450],[5,350],[Infinity,-100]])},
-			{number: 23, event: new fss.Contract(name: "SAR P3", valueSchedule: [[3,400],[6,300],[Infinity,-150]])},
-			{number: 8, event: new fss.Contract(name: "VIS P1", valueSchedule: [[1,600],[4,500],[Infinity,-50]])},
-			{number: 17, event: new fss.Contract(name: "VIS P2", valueSchedule: [[2,500],[5,400],[Infinity,-100]])},
-			{number: 8, event: new fss.Contract(name: "VIS P3", valueSchedule: [[3,450],[6,350],[Infinity,-150]])},
+			{number: 8, event: new fss.Demand(name: "SAR P1", valueSchedule: [[1,500],[4,400]], defaultValue: -50)},
+			{number: 12, event: new fss.Demand(name: "SAR P2", valueSchedule: [[2,450],[5,350]], defaultValue: -100)},
+			{number: 23, event: new fss.Demand(name: "SAR P3", valueSchedule: [[3,400],[6,300]], defaultValue: -150)},
+			{number: 8, event: new fss.Demand(name: "VIS P1", valueSchedule: [[1,600],[4,500]], defaultValue: -50)},
+			{number: 17, event: new fss.Demand(name: "VIS P2", valueSchedule: [[2,500],[5,400]], defaultValue: -100)},
+			{number: 8, event: new fss.Demand(name: "VIS P3", valueSchedule: [[3,450],[6,350]], defaultValue: -150)},
 			{number: 5, event: new fss.Disturbance(name: "Minor"},
 			{number: 1, event: new fss.Disturbance(name: "Major"}
 		];
@@ -46,8 +47,8 @@ define(function(require) {
 		
 		];
 		this.subsystemTypes = [
-			new fss.Subsystem({name: "SGL(p)", cost: 50, size: 1, capacity: 0, bandwidth: 1}),
-			new fss.Subsystem({name: "SAR", cost: 250, size: 1, capacity: 1, bandwidth: 0})
+			new fss.Subsystem({name: "SGL(p)", type: "p", cost: 50, size: 1, capacity: 0, bandwidth: 1}),
+			new fss.Subsystem({name: "SAR", type: "SAR", cost: 250, size: 1, capacity: 1, bandwidth: 0})
 		];
     };
 	
@@ -72,6 +73,7 @@ define(function(require) {
 				events.push(clone(this.eventTypes[i].event));
 			}
 		}
+		// TODO shuffle events
 		
 		var federates = [];
 		for(var i = 0; i < this.numFederates; i++) {
@@ -82,12 +84,21 @@ define(function(require) {
 		}
 		return new fss.Context({
 			locations: locations,
-			events: [],
+			events: events,
 			federations: [new fss.Federation({
 				name: "FSS",
 				federates: federates
 		});
 	};
+	
+	Game.prototype.execute = new function() {
+		var sim = mas.sim.Simulator({
+			entities: [this.buildContext()]
+			initTime: 0,
+			timeStep: 1,
+			maxTime: 5
+		});
+	}
 	
 	function clone(obj) {
 		if(obj == null || typeof(obj) != 'object')
@@ -102,6 +113,4 @@ define(function(require) {
 		}
 		return temp;
 	}
-
-    return Data;
 });

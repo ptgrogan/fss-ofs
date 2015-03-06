@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
+var requirejs = require('requirejs');
 
-define(function(require) {
-	var System = require('system');
+requirejs.config({
+  baseUrl: '../lib',
+  nodeRequire: require
+});
+
+requirejs(['mas','fss-ofs'], function(mas,fss) {
+	console.log('this is a test');
 	
-    function GroundStation() {
-		System.apply(this, arguments);
-    };
 	
-	GroundStation.prototype = new System();
 	
-	GroundStation.getCommissionCost = function() {
-		return 0;
-	}
 	
-	GroundStation.getDecommissionValue = function() {
-		return 0.5*this.getDesignCost();
-	}
 	
-    return GroundStation;
 });
