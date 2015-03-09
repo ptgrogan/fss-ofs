@@ -17,6 +17,7 @@
     "dependencies": {
         "requirejs" : "*",
         "amdefine": "*",
-        "mas": "*"
+        "mas": "*",
+        "random-js": "*"
     }
 }
