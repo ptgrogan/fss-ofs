@@ -21,7 +21,7 @@ requirejs.config({
   nodeRequire: require
 });
 
-requirejs(['mas','fss-ofs','game'], function(mas,fss,Game) {
+requirejs(['underscore','mas','fss-ofs','game'], function(_,mas,fss,Game) {
 	var game = new Game();
 	var context = game.buildContext(0);
 	var sim = new mas.sim.Simulator({
@@ -32,25 +32,51 @@ requirejs(['mas','fss-ofs','game'], function(mas,fss,Game) {
 	});
 	sim.init();
 	
-	console.log(context.locations);
+	/*
+	var gs = new fss.GroundStation({
+		id: "X", 
+		cost: 500, 
+		maxSize: 4, 
+		subsystems: []
+	});
+	var sc = new fss.Spacecraft({
+		id: "A", 
+		cost: 200, 
+		maxSize: 2, 
+		subsystems: []
+	});
+	*/
 	
-	console.log(context.federations[0].federates[0]);
 	
-	var gs = new fss.GroundStation({name: "X", cost: 500, maxSize: 4});
-	var sc = new fss.Spacecraft({name: "A", cost: 200, maxSize: 2});
-	context.federations[0].federates[0].design(gs);
-	var b = context.federations[0].federates[0].commission(gs, 
-			context.locations[0], context);
-
-	console.log(context.federations[0].federates[0]);
+	sim.on("init", function() {
+		var gs = new fss.GroundStation(_.findWhere(game.systemTypes, {type: "Ground Station"}));
+		gs.subsystems.push(new fss.Subsystem(_.findWhere(game.subsystemTypes, {type: "SGL(p)"})));
+		
+		context.federations[0].federates[0].design(gs);
+		context.federations[0].federates[0].commission(gs, 
+				context.locations[0], context);
+		
+		var sc = new fss.Spacecraft(_.findWhere(game.systemTypes, {type: "Small Sat"}));
+		sc.subsystems.push(new fss.Subsystem(_.findWhere(game.subsystemTypes, {type: "SAR"})));
+		sc.subsystems.push(new fss.Subsystem(_.findWhere(game.subsystemTypes, {type: "SGL(p)"})));
+		
+		context.federations[0].federates[0].design(sc);
+		context.federations[0].federates[0].commission(sc, 
+				context.locations[1], context);
+	});
 	
-	context.federations[0].federates[0].design(sc);
-	context.federations[0].federates[0].commission(sc, 
-			context.locations[1], context);
-			
-	console.log(context.federations[0].federates[0]);
+	sim.on("advance", function(time) {
+		console.log('Turn ' + time);
+		console.log('Cash ' + context.federations[0].federates[0].cash);
+		console.log(context.currentEvents[context.federations[0].federates[0].systems[1].location.sector]);
+		
+		console.log(context.federations[0].federates[0].systems[1].canSense(_.findWhere(context.currentEvents, {sector: context.federations[0].federates[0].systems[1].location.sector})));
+	});
 	
-	sim.advance();
+	sim.on("complete", function() {
+		context.federations[0].federates[0].liquidate();
+		console.log(context.federations[0].federates[0]);
+	});
 	
-	console.log(context.federations[0].federates[0]);
+	sim.execute();
 });
