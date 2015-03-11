@@ -52,29 +52,38 @@ requirejs(['underscore','mas','fss-ofs','game'], function(_,mas,fss,Game) {
 		var gs = new fss.GroundStation(_.findWhere(game.systemTypes, {type: "Ground Station"}));
 		gs.subsystems.push(new fss.Subsystem(_.findWhere(game.subsystemTypes, {type: "SGL(p)"})));
 		
-		context.federations[0].federates[0].design(gs);
-		context.federations[0].federates[0].commission(gs, 
-				context.locations[0], context);
+		var federate = context.federations[0].federates[0];
+		
+		federate.design(gs);
+		federate.commission(gs, context.locations[0], context);
 		
 		var sc = new fss.Spacecraft(_.findWhere(game.systemTypes, {type: "Small Sat"}));
 		sc.subsystems.push(new fss.Subsystem(_.findWhere(game.subsystemTypes, {type: "SAR"})));
 		sc.subsystems.push(new fss.Subsystem(_.findWhere(game.subsystemTypes, {type: "SGL(p)"})));
 		
-		context.federations[0].federates[0].design(sc);
-		context.federations[0].federates[0].commission(sc, 
-				context.locations[1], context);
+		federate.design(sc);
+		federate.commission(sc, context.locations[1], context);
 	});
 	
 	sim.on("advance", function(time) {
 		console.log('Turn ' + time);
 		console.log('Cash ' + context.federations[0].federates[0].cash);
-		console.log(context.currentEvents[context.federations[0].federates[0].systems[1].location.sector]);
 		
-		console.log(context.federations[0].federates[0].systems[1].canSense(_.findWhere(context.currentEvents, {sector: context.federations[0].federates[0].systems[1].location.sector})));
+		var federate = context.federations[0].federates[0];
+		var event = _.findWhere(context.currentEvents, {sector: _.findWhere(context.locations, {id: federate.systems[1].location}).sector});
+		
+		console.log(event);
+
+		if(federate.systems[1].canSense(event, context)) {
+			if(contract = federate.contract(event, context)) {
+				federate.sense(contract, federate.systems[1], context);
+			}
+		}
+		console.log(federate.systems[1].subsystems[0].contents);
 	});
 	
 	sim.on("complete", function() {
-		context.federations[0].federates[0].liquidate();
+		context.federations[0].federates[0].liquidate(context);
 		console.log(context.federations[0].federates[0]);
 	});
 	
