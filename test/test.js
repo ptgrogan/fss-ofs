@@ -28,9 +28,8 @@ requirejs(['underscore','mas','fss-ofs','game'], function(_,mas,fss,Game) {
 		entities: [context],
 		initTime: 0,
 		timeStep: 1,
-		maxTime: 10
+		maxTime: 24
 	});
-	sim.init();
 	
 	sim.on("init", function() {
 		var gs = new fss.GroundStation(_.findWhere(game.systemTypes, {type: "Ground Station"}));
@@ -49,24 +48,29 @@ requirejs(['underscore','mas','fss-ofs','game'], function(_,mas,fss,Game) {
 		federate.commission(sc, context.locations[1], context);
 	});
 	
-	sim.on("advance", function(time) {
-		console.log('Turn ' + time);
-		console.log('Cash ' + context.federations[0].federates[0].cash);
+	sim.on("init advance", function(time) {
+		console.log('Start Turn ' + time);
 		
 		_.each(context.federations, function(federation) {
 			_.each(federation.federates, function(federate) {
+				console.log(federate.id + ' cash: ' + federate.cash);
+				federate.autoDecommission(context);
 				federate.autoContractAndSense(context);
 				federate.autoDownlink(context);
 				federate.autoContractAndSense(context);
 			});
 		});
+		console.log('End Turn ' + time);
 	});
 	
 	sim.on("complete", function() {
 		_.each(context.federations, function(federation) {
 			_.each(federation.federates, function(federate) {
 				federate.liquidate(context);
-				console.log(federate);
+				_.each(federate.contracts, function(contract) {
+					federate.defaultContract(contract, context);
+				}, this);
+				console.log(federate.id + ' cash: ' + federate.cash);
 			}, this);
 		}, this);
 	});
