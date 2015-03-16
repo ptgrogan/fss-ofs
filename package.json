@@ -19,6 +19,8 @@
         "amdefine": "*",
         "underscore": "*",
         "mas": "*",
-        "random-js": "*"
+        "random-js": "*",
+        "winston": "*",
+        "minimist": "*"
     }
 }
