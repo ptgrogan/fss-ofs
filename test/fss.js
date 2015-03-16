@@ -24,21 +24,21 @@ requirejs.config({
 requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,fss,Game) {
     var argv = require('minimist')(process.argv.slice(2));
     
-	var game = new Game({
+    var game = new Game({
         numTurns: (argv.d&&_.isNumber(argv.d))?argv.d:24,
         initialCash: (argv.i&&_.isNumber(argv.i))?argv.i:1200
     });
-	var context = game.buildContext((argv.s&&_.isNumber(argv.s))?argv.s:0);
+    var context = game.buildContext((argv.s&&_.isNumber(argv.s))?argv.s:0);
     
-	var sim = new mas.sim.Simulator({
-		entities: [context],
-		initTime: 0,
-		timeStep: 1,
-		maxTime: game.numTurns
-	});
-	
-	sim.on("init", function() {
-		var federate = context.federations[0].federates[0];
+    var sim = new mas.sim.Simulator({
+        entities: [context],
+        initTime: 0,
+        timeStep: 1,
+        maxTime: game.numTurns
+    });
+    
+    sim.on("init", function() {
+        var federate = context.federations[0].federates[0];
         
         _.each(argv._, function(design) {
             var specs = design.split(",");
@@ -80,36 +80,36 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                 }
             }
         });
-	});
-	
-	sim.on("init advance", function(time) {
-		logger.verbose('Start Turn ' + time);
-		
-		_.each(context.federations, function(federation) {
-			_.each(federation.federates, function(federate) {
-				federate.autoDecommission(context);
-				federate.autoContractAndSense(context);
-				federate.autoDownlink(context);
-				federate.autoContractAndSense(context);
-				logger.verbose(federate.id + ' cash: ' + federate.cash);
-			});
-		});
-		logger.verbose('End Turn ' + time);
-	});
-	
-	sim.on("complete", function() {
-		_.each(context.federations, function(federation) {
-			_.each(federation.federates, function(federate) {
-				federate.liquidate(context);
-				_.each(federate.contracts, function(contract) {
-					federate.defaultContract(contract, context);
-				}, this);
-				logger.info(federate.id + ' final cash: ' + federate.cash);
-				logger.info(federate.id + ' ROI: ' + (federate.cash/federate.initialCash));
-			}, this);
-		}, this);
+    });
+    
+    sim.on("init advance", function(time) {
+        logger.verbose('Start Turn ' + time);
+        
+        _.each(context.federations, function(federation) {
+            _.each(federation.federates, function(federate) {
+                federate.autoDecommission(context);
+                federate.autoContractAndSense(context);
+                federate.autoDownlink(context);
+                federate.autoContractAndSense(context);
+                logger.verbose(federate.id + ' cash: ' + federate.cash);
+            });
+        });
+        logger.verbose('End Turn ' + time);
+    });
+    
+    sim.on("complete", function() {
+        _.each(context.federations, function(federation) {
+            _.each(federation.federates, function(federate) {
+                federate.liquidate(context);
+                _.each(federate.contracts, function(contract) {
+                    federate.defaultContract(contract, context);
+                }, this);
+                logger.info(federate.id + ' final cash: ' + federate.cash);
+                logger.info(federate.id + ' ROI: ' + (federate.cash/federate.initialCash));
+            }, this);
+        }, this);
         console.log(context.federations[0].federates[0].cash);
-	});
-	
-	sim.execute();
+    });
+    
+    sim.execute();
 });
