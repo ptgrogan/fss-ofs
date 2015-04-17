@@ -27,6 +27,7 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     // define the game and build the context
     var game = new Game({
         numTurns: (argv.d&&_.isNumber(argv.d))?argv.d:24,
+        numPlayers: (argv.p&&_.isNumber(argv.p))?argv.p:1,
         initialCash: (argv.i&&_.isNumber(argv.i))?argv.i:1200
     });
     var context = game.buildContext((argv.s&&_.isNumber(argv.s))?argv.s:0);
@@ -41,12 +42,13 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     
     // define callback to initialize game
     sim.on("init", function() {
-        var federate = context.federations[0].federates[0];
-        
         _.each(argv._, function(design) {
             var specs = design.split(",");
-            if(specs.length > 0 && specs[0].split("@").length === 2) {
-                var systemType = specs[0].split("@")[0];
+            if(specs.length > 0 && specs[0].split("@").length === 2 
+                    && specs[0].split("@")[0].split(".").length === 2) {
+                var fedInd = parseInt(specs[0].split("@")[0].split(".")[0],10)-1;
+                var federate = context.federations[0].federates[fedInd];
+                var systemType = specs[0].split("@")[0].split(".")[1];
                 var location = _.find(context.locations, {id: specs[0].split("@")[1]});
                 
                 var system;
@@ -109,8 +111,8 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                 logger.info(federate.id + ' final cash: ' + federate.cash);
                 logger.info(federate.id + ' ROI: ' + (federate.cash/federate.initialCash));
             }, this);
+            console.log(_.map(federation.federates, function(federate) { return federate.cash; }).join());
         }, this);
-        console.log(context.federations[0].federates[0].cash);
     });
     
     // execute the simulation
