@@ -91,10 +91,7 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         
         _.each(context.federations, function(federation) {
             _.each(federation.federates, function(federate) {
-                federate.autoDecommission(context);
-                federate.autoContractAndSense(context);
-                federate.autoDownlink(context);
-                federate.autoContractAndSense(context);
+                federate.operations.execute(federate, context);
                 logger.verbose(federate.id + ' cash: ' + federate.cash);
             });
         });
