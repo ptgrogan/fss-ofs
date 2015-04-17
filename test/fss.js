@@ -24,12 +24,14 @@ requirejs.config({
 requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,fss,Game) {
     var argv = require('minimist')(process.argv.slice(2));
     
+    // define the game and build the context
     var game = new Game({
         numTurns: (argv.d&&_.isNumber(argv.d))?argv.d:24,
         initialCash: (argv.i&&_.isNumber(argv.i))?argv.i:1200
     });
     var context = game.buildContext((argv.s&&_.isNumber(argv.s))?argv.s:0);
     
+    // define the simulator
     var sim = new mas.sim.Simulator({
         entities: [context],
         initTime: 0,
@@ -37,6 +39,7 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         maxTime: game.numTurns
     });
     
+    // define callback to initialize game
     sim.on("init", function() {
         var federate = context.federations[0].federates[0];
         
@@ -82,6 +85,7 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         });
     });
     
+    // define callback to process turn actions
     sim.on("init advance", function(time) {
         logger.verbose('Start Turn ' + time);
         
@@ -97,6 +101,7 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         logger.verbose('End Turn ' + time);
     });
     
+    // define callback to conclude game
     sim.on("complete", function() {
         _.each(context.federations, function(federation) {
             _.each(federation.federates, function(federate) {
@@ -111,5 +116,6 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         console.log(context.federations[0].federates[0].cash);
     });
     
+    // execute the simulation
     sim.execute();
 });
