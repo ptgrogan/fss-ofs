@@ -46,15 +46,17 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
             var specs = design.split(",");
             if(specs.length > 0 && specs[0].split("@").length === 2) {
                 var federate;
+                var systemType;
                 if(specs[0].split("@")[0].split(".").length === 2) {
                     // determine player ownership
                     var fedInd = parseInt(specs[0].split("@")[0].split(".")[0],10)-1;
                     federate = context.federations[0].federates[fedInd];
+                    systemType = specs[0].split("@")[0].split(".")[1];
                 } else {
                     // default to player 1 ownership
                     federate = context.federations[0].federates[0];
+                    systemType = specs[0].split("@")[0];
                 }
-                var systemType = specs[0].split("@")[0].split(".")[1];
                 var location = _.find(context.locations, {id: specs[0].split("@")[1]});
                 
                 var system;
