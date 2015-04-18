@@ -99,12 +99,9 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     sim.on("init advance", function(time) {
         logger.verbose('Start Turn ' + time);
         
-        _.each(context.federations, function(federation) {
-            _.each(federation.federates, function(federate) {
-                // TODO: randomize federate order?
-                federate.operations.execute(federate, context);
-                logger.verbose(federate.id + ' cash: ' + federate.cash);
-            });
+        _.each(context.getShuffledFederates(), function(federate) {
+            federate.operations.execute(federate, context);
+            logger.verbose(federate.id + ' cash: ' + federate.cash);
         });
         logger.verbose('End Turn ' + time);
     });
