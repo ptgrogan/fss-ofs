@@ -63,10 +63,8 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                 
                 var system;
                 if(def = _.findWhere(game.stationTypes, {type: systemType})) {
-                    def.id = 'Gnd1'; // FIXME
                     system = new fss.GroundStation(def);
                 } else if(def = _.findWhere(game.spacecraftTypes, {type: systemType})) {
-                    def.id = 'Sat1'; // FIXME
                     system = new fss.Spacecraft(def);
                 }
                 
