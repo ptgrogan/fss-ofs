@@ -113,9 +113,9 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         _.each(context.federations, function(federation) {
             _.each(federation.federates, function(federate) {
                 federate.liquidate(context);
-                _.each(federate.contracts, function(contract) {
-                    federate.defaultContract(contract, context);
-                }, this);
+                while(federate.contracts.length > 0) {
+                    federate.defaultContract(federate.contracts[0], context);
+                }
                 logger.info(federate.id + ' final cash: ' + federate.cash);
                 logger.info(federate.id + ' ROI: ' + (federate.cash/federate.initialCash));
             }, this);
