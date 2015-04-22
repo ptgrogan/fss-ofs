@@ -21,6 +21,7 @@
         "mas": "*",
         "random-js": "*",
         "winston": "*",
-        "minimist": "*"
+        "minimist": "*",
+        "lp_solve": "*"
     }
 }

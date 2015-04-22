@@ -30,7 +30,9 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
         numPlayers: (argv.p&&_.isNumber(argv.p))?argv.p:1,
         initialCash: (argv.i&&_.isNumber(argv.i))?argv.i:1200
     });
-    var context = game.buildContext((argv.s&&_.isNumber(argv.s))?argv.s:0);
+    var context = game.buildContext(
+            (argv.s&&_.isNumber(argv.s))?argv.s:0,
+            argv.o==='d'?'dynamic':'simple');
     
     // define the simulator
     var sim = new mas.sim.Simulator({
@@ -61,8 +63,10 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                 
                 var system;
                 if(def = _.findWhere(game.stationTypes, {type: systemType})) {
+                    def.id = 'Gnd1'; // FIXME
                     system = new fss.GroundStation(def);
                 } else if(def = _.findWhere(game.spacecraftTypes, {type: systemType})) {
+                    def.id = 'Sat1'; // FIXME
                     system = new fss.Spacecraft(def);
                 }
                 
