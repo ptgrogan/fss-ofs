@@ -3,14 +3,14 @@ Federated Satellite Systems---Orbital Federates Simulation
 
 This is a simulator for the Orbital Federates game. Its current form runs as a command-line script which accepts initial design decisions and options as arguments and outputs the final state of each player.
 
-# Prerequisites
+## Prerequisites
 
 This project requires the following two applications:
  1. Node.js (recommended version: [0.10.34](http://nodejs.org/dist/v0.10.34/) for compatibility with lp_solve module)
  2. Visual Studio (recommended version: [Community 2013](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx), required to compile lp_solve module)
 *Note: the specific versions above are strongly recommended due to numerous problems encountered!*
 
-# Installation Instruction
+## Installation Instruction
  1. Clone this repository using any git client ([git-scm](http://git-scm.com/downloads) is a basic one)
  2. Install NPM modules:
   * Open a command console, navigate to the cloned repository directory, and enter the command: `npm install`
@@ -19,12 +19,12 @@ This project requires the following two applications:
   * Note: Visual Studio or .NET Framework is required to compile the lp_solve module. Recommend using Visual Studio Community 2013.
   * Note: Recent versions of Node.js generate errors when installing lp_solve. Recommend using Node.js version 0.10.34.
   
-# Executing the Simulation
+## Executing the Simulation
  1. Navigate to the `/test` directory
  2. Execute the command `node fss` to execute a basic game with no initial conditions
  3. The output of `1200` indicates the player still has all 1200 of initial funds
 
-# Command line options
+## Command line options
  * `-i` Sets initial funds for each player. Must be a positive integer. Default: `-i 1200`
  * `-d` Sets the game duration in number of turns. Must be a positive integer. Default: `-d 24`
  * `-s` Sets the master random number generator seed. Must be an integer. Default: `-s 0`
@@ -52,10 +52,16 @@ This project requires the following two applications:
      * `DAT`: Data storage unit. Can store 1 bit of data per turn. Takes up 1 module and costs 50.
      * `DEF`: Debris defense. Protects a spacecraft from debris events. Takes up 1 module and costs 100.
 
-Example script:
+## Example Script
 
-`node fss -p 2 1.SmallSat@LEO1,pSGL,VIS 1.GroundSta@SUR3,pSGL 2.SmallSat@LEO3,pSGL,SAR 2.GroundSta@SUR5,pSGL -s 10 -o d`
+Input:
 
-Should output:
+`node fss -p 2 1.SmallSat@LEO1,pSGL,VIS 1.GroundSta@SUR3,pSGL 2.SmallSat@LEO3,oSGL,SAR 2.GroundSta@SUR5,oSGL -s 10 -o d`
 
-`2725,3200`
+Run a 2-player simulation with initial seed 10 and dynamic operational model. Player 1 controls a ground station and small satellite with proprietary space-to-ground link and a visual light sensor. Player 2 controls a ground station and small satellite with open space-to-ground link and synthetic aperture radar.
+
+Output:
+
+`2725,3150`
+
+To show player 1 ends with 2725 and player 2 ends with 3150.
