@@ -5,9 +5,9 @@ This is a simulator for the Orbital Federates game. Its current form runs as a c
 
 ## Prerequisites
 
-This project requires the following two applications:
+This project requires the following applications:
  1. Node.js (recommended version: [0.10.34](http://nodejs.org/dist/v0.10.34/) for compatibility with lp_solve module)
- 1. Python (version 2.7 recommended, version 3.x **not** supported)
+ 1. Python (recommended version: [2.7](https://www.python.org/downloads/), version 3.x **not** supported)
  2. Visual Studio (recommended version: [Community 2013](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx), required to compile lp_solve module)
 *Note: the specific versions above are strongly recommended due to numerous problems encountered!*
 
