@@ -28,7 +28,7 @@ This project requires the following two applications:
  * `-i` Sets initial funds for each player. Must be a positive integer. Default: `-i 1200`
  * `-d` Sets the game duration in number of turns. Must be a positive integer. Default: `-d 24`
  * `-s` Sets the master random number generator seed. Must be an integer. Default: `-s 0`
- * `-l` Sets the logging level. Select from {none, error, info, verbose, debug}. Default: `-l none`
+ * `-l` Sets the logging level. Select from {none, error, info, verbose, debug}. Default: `-l error`
  * `-p` Sets the number of players. Must be a positive integer. Default: `-p 1`
  * `-o` Sets the operational decision model. Select from {d,s} for dynamic (integer program) or simple (heuristic). Default: `-o s`
  * `P.SysName@LOC,Sub1,Sub2,SubN` Defines a system controlled by player `P` (positive integer) of system type `SysName`, instantiated at location `LOC` with subsystems `Sub1`, `Sub2`, and `SubN`.
