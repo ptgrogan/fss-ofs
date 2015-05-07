@@ -7,8 +7,11 @@ This is a simulator for the Orbital Federates game. Its current form runs as a c
 
 This project requires the following two applications:
  1. Node.js (recommended version: [0.10.34](http://nodejs.org/dist/v0.10.34/) for compatibility with lp_solve module)
+ 1. Python (version 2.7 recommended, version 3.x **not** supported)
  2. Visual Studio (recommended version: [Community 2013](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx), required to compile lp_solve module)
 *Note: the specific versions above are strongly recommended due to numerous problems encountered!*
+
+Also please refer to [node-gyp documentation](https://github.com/TooTallNate/node-gyp) for most up-to-date prerequisites.
 
 ## Installation Instruction
  1. Clone this repository using any git client ([git-scm](http://git-scm.com/downloads) is a basic one)
