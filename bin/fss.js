@@ -26,9 +26,9 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     
     // define the game and build the context
     var game = new Game({
-        numTurns: (argv.d&&_.isNumber(argv.d))?argv.d:24,
-        numPlayers: (argv.p&&_.isNumber(argv.p))?argv.p:1,
-        initialCash: (argv.i&&_.isNumber(argv.i))?argv.i:1200
+        numTurns: _.isNumber(argv.d)?argv.d:24,
+        numPlayers: _.isNumber(argv.p)?argv.p:1,
+        initialCash: _.isNumber(argv.i)?argv.i:1200
     });
     var context = game.buildContext(
             (argv.s&&_.isNumber(argv.s))?argv.s:0,
@@ -44,19 +44,22 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     
     // define callback to initialize game
     sim.on("init", function() {
+		var designSets = [];
+		_.each(context.federations[0].federates, function(federate, index) {
+			designSets[index] = [];
+		});
+		
         _.each(argv._, function(design) {
             var specs = design.split(",");
             if(specs.length > 0 && specs[0].split("@").length === 2) {
-                var federate;
                 var systemType;
+				var fedInd = 0;
                 if(specs[0].split("@")[0].split(".").length === 2) {
                     // determine player ownership
                     var fedInd = parseInt(specs[0].split("@")[0].split(".")[0],10)-1;
-                    federate = context.federations[0].federates[fedInd];
                     systemType = specs[0].split("@")[0].split(".")[1];
                 } else {
                     // default to player 1 ownership
-                    federate = context.federations[0].federates[0];
                     systemType = specs[0].split("@")[0];
                 }
                 var location = _.find(context.locations, {id: specs[0].split("@")[1]});
@@ -89,12 +92,26 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                             }
                         }
                     });
-                    federate.design(system);
-                    
-                    federate.commission(system, location, context);
                 }
+				designSets[fedInd].push({system: system, location: location});
             }
         });
+		_.each(designSets, function(designSet, index) {
+			var federate = context.federations[0].federates[index];
+			if(federate.initialCash===0) {
+				// special case if 0 initial cash: grant enough for initial design
+				federate.initialCash = _.reduce(designSet, function(memo, design){
+					return memo + design.system.getDesignCost() 
+							+ design.system.getCommissionCost(design.location);
+				}, 0);
+				federate.cash = federate.initialCash;
+			}
+			
+			_.each(designSet, function(design) {
+				federate.design(design.system);
+				federate.commission(design.system, design.location, context);
+			});
+		});
     });
     
     // define callback to process turn actions
@@ -119,7 +136,11 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                 logger.info(federate.id + ' final cash: ' + federate.cash);
                 logger.info(federate.id + ' ROI: ' + (federate.cash/federate.initialCash));
             }, this);
-            console.log(_.map(federation.federates, function(federate) { return federate.cash; }).join());
+            console.log(_.map(federation.federates, function(federate) { 
+					// TODO replace with initial/final cash
+					// return federate.cash;
+					return federate.initialCash+":"+federate.cash;
+			}).join());
         }, this);
     });
     

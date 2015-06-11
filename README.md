@@ -23,7 +23,7 @@ Also please refer to [node-gyp documentation](https://github.com/TooTallNate/nod
   * Note: Recent versions of Node.js generate errors when installing lp_solve. Recommend using Node.js version 0.10.34.
   
 ## Executing the Simulation
- 1. Navigate to the `/test` directory
+ 1. Navigate to the `/bin` directory
  2. Execute the command `node fss` to execute a basic game with no initial conditions
  3. The output of `1200` indicates the player still has all 1200 of initial funds
 
