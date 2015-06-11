@@ -66,6 +66,7 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 		"1.MediumSat@LEO6,VIS,SAR,pISL,pISL 1.MediumSat@LEO2,VIS,SAR,pISL,pISL 1.MediumSat@GEO1,pISL,pISL,pSGL,pSGL 1.GroundSta@SUR1,pSGL,pSGL", // 42
 		"1.MediumSat@LEO6,VIS,SAR,pISL,pISL 1.MediumSat@LEO2,VIS,SAR,pISL,pISL 1.MediumSat@LEO4,VIS,SAR,pISL,pISL 1.MediumSat@GEO1,pISL,pISL,pSGL,pSGL 1.GroundSta@SUR1,pSGL,pSGL", // 43
 		"1.MediumSat@LEO6,VIS,SAR,pISL,pISL 1.MediumSat@LEO2,VIS,SAR,pISL,pISL 1.MediumSat@LEO4,VIS,SAR,pISL,pISL 1.LargeSat@GEO1,pISL,pISL,pISL,pSGL,pSGL,pSGL 1.GroundSta@SUR1,pSGL,pSGL,pSGL", // 44
+		"1.SmallSat@LEO1,VIS,pSGL 1.SmallSat@LEO1,SAR,pSGL 1.GroundSta@SUR1,pSGL", // 45
 	];
 	
 	if(_.isNumber(argv.run) && (argv.run >= 0) && (argv.run < runs.length)) {
@@ -82,7 +83,7 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			console.info('Executing batch for seeds ' + batchStart + ' to ' + batchStop);
 			_.each(_.range(batchStart, batchStop, 1), function(seed) {
 				var exec = child_process.exec, child;
-				child = exec('node fss -d 12 -p 1 -i 1200 -o d ' 
+				child = exec('node fss -d 12 -p 1 -i 0 -o d ' 
 						+ runs[run] + ' -r ' + run + ' -s ' + seed, 
 						function(error, stdout, stderr) {
 							logger.info('Result for seed ' + seed + ': ' + stdout);
