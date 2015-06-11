@@ -32,7 +32,8 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     });
     var context = game.buildContext(
             (argv.s&&_.isNumber(argv.s))?argv.s:0,
-            argv.o==='d'?'dynamic':'simple');
+            argv.o==='d'?'dynamic':(argv.o==='n'?'none':'simple'),
+			argv.f==='d'?'dynamic':'none');
     
     // define the simulator
     var sim = new mas.sim.Simulator({
@@ -112,17 +113,6 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
 				federate.commission(design.system, design.location, context);
 			});
 		});
-    });
-    
-    // define callback to process turn actions
-    sim.on("init advance", function(time) {
-        logger.verbose('Start Turn ' + time);
-        
-        _.each(context.getShuffledFederates(), function(federate) {
-            federate.operations.execute(federate, context);
-            logger.verbose(federate.id + ' cash: ' + federate.cash);
-        });
-        logger.verbose('End Turn ' + time);
     });
     
     // define callback to conclude game

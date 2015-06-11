@@ -33,7 +33,8 @@ Also please refer to [node-gyp documentation](https://github.com/TooTallNate/nod
  * `-s` Sets the master random number generator seed. Must be an integer. Default: `-s 0`
  * `-l` Sets the logging level. Select from {none, error, info, verbose, debug}. Default: `-l error`
  * `-p` Sets the number of players. Must be a positive integer. Default: `-p 1`
- * `-o` Sets the operational decision model. Select from {d,s} for dynamic (integer program) or simple (heuristic). Default: `-o s`
+ * `-o` Sets the federate operational model. Select from {d,s,n} for dynamic (integer program), simple (heuristic), or none. Default: `-o s`
+ * `-f` Sets the federation operational model. Select from {d,n} for dynamic (integer program) or none. Default: `-f n`
  * `P.SysName@LOC,Sub1,Sub2,SubN` Defines a system controlled by player `P` (positive integer) of system type `SysName`, instantiated at location `LOC` with subsystems `Sub1`, `Sub2`, and `SubN`.
    * Available Systems:
      * `GroundSta`: Ground station with capacity for 3 subsystem modules. Costs 500 to design and 0 to commission on the surface.
