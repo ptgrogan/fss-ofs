@@ -22,6 +22,8 @@
         "random-js": "*",
         "winston": "*",
         "minimist": "*",
-        "lp_solve": "*"
+        "lp_solve": "*",
+        "mongodb": "*",
+        "mongojs": "*"
     }
 }
