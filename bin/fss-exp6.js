@@ -18,7 +18,7 @@ var requirejs = require('requirejs');
 
 requirejs(['underscore','winston','child_process','minimist','mongojs'], function(_,logger,child_process,minimist,mongo) {
     var argv = minimist(process.argv.slice(2)); // parse command-line arguments
-	var db = mongo("fss", ["exp6"]); // create database object
+	var db = mongo("fss"); // create database object
 	
     /**
      * Enumerates combinations of a specified size (with or without replacement) 
@@ -422,6 +422,46 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			});
 	}
 	
+    /**
+     * Enumerates all symmetric sets of N satellites owned by P players.
+     * @param {Number} number - The number of satellites.
+     * @param {Array} players - The players.
+     * @param {Array} sectors - The sectors.
+     * @param {String} sgl - The SGL protocol.
+     * @param {String} isl - The ISL protocol.
+     * @returns {Array} The set of satellite designs.
+     */
+	function enumSymmetricPxNSats(number, players, sectors, sgl, isl) {
+		var sats = [];
+		_.each(_.range(0,players.length,1), function(i) {
+			sats.push(enum1xNSats(number, players[i], sectors[i], sgl, isl))
+		});
+		return _.map(_.range(0,sats[0].length,1), function(i) {
+					return _.map(_.range(0,players.length,1), function(p) {
+								return sats[p][i];
+							});
+				});
+	}
+	
+    /**
+     * Enumerates all symmetric designs for N satellites owned by P players.
+     * @param {Number} number - The number of satellites.
+     * @param {Array} players - The players.
+     * @param {Array} sectors - The sectors.
+     * @param {String} sgl - The SGL protocol.
+     * @param {String} isl - The ISL protocol.
+     * @returns {Array} The set of satellite designs.
+     */
+	function enumSymmetricPxNSatDesigns(number, players, sectors, sgl, isl) {
+		return _.map(enumSymmetricPxNSats(number, players, sectors, sgl, isl), 
+			function(pSats) {
+				return _.map(pSats, function(sats, i) {
+					return [sats.join(" "), sizeStation(players[i],sectors[i],sgl,sats)].join(" ");
+				}).join(" ");
+			});
+	}
+	
+	/*
 	var runs = _.union(
 			enumPxNSatDesigns(1,[1],[1],"pSGL","pISL"), 
 			enumPxNSatDesigns(2,[1],[1],"pSGL","pISL"),
@@ -441,11 +481,24 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			enumPxNSatDesigns(2,[1,2,3],[1,5,3],"oSGL","oISL")
 		);
 	
-	/*
 	runs = _.filter(runs, function(run) {
 		return !run.match(/VIS/g);
 	})
 	*/
+	var runs = _.union(
+			enumSymmetricPxNSatDesigns(1,[1],[1],"pSGL","pISL"), 
+			enumSymmetricPxNSatDesigns(2,[1],[1],"pSGL","pISL"),
+			enumSymmetricPxNSatDesigns(3,[1],[1],"pSGL","pISL"),
+			enumSymmetricPxNSatDesigns(4,[1],[1],"pSGL","pISL"),
+			enumSymmetricPxNSatDesigns(5,[1],[1],"pSGL","pISL"),
+			enumSymmetricPxNSatDesigns(6,[1],[1],"pSGL","pISL"),
+			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"pSGL","oISL"),
+			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"oSGL","oISL"),
+			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"pSGL","oISL"),
+			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","oISL"),
+			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"pSGL","oISL"),
+			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL")
+		);
 	
 	//console.log(runs)
 	console.log(runs.length)
@@ -516,7 +569,7 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 						_.each(values, function(value, player) {
 							var initialCash = parseFloat(value.split(':')[0]);
 							var finalCash = parseFloat(value.split(':')[1]);
-							db.collection('exp6').update(
+							db.collection('exp6s').update(
 								{run: run, seed: seed, player: player},
 								{$set: 
 									{

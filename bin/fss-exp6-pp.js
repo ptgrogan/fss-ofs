@@ -17,7 +17,7 @@
 var requirejs = require('requirejs');
 
 requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,logger,child_process,mongo,fs) {
-	var db = mongo("fss", ["exp6"]);
+	var db = mongo("fss");
 	
 	// code below inherited from https://gist.github.com/RedBeard0531/1886960
 	var map = function() {
@@ -82,7 +82,7 @@ requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,lo
 	// end inherited code
 	
 	
-	db.collection('exp6').mapReduce(map, reduce, {finalize:finalize, out:{inline:1}}, function(err, result) {
+	db.collection('exp6s').mapReduce(map, reduce, {finalize:finalize, out:{inline:1}}, function(err, result) {
 		if(err!==null) {
 			logger.error(err);
 		} else {

@@ -137,6 +137,7 @@ tradespace('2', id[np.logical_and(players==2,player==0)],
 	run[np.logical_and(players==2,player==0)], 
 	isl[np.logical_and(players==2,player==0)], 
 	osgl[np.logical_and(players==2,player==0)])
+"""
 tradespace('3', id[np.logical_and(players==3,player==0)], 
 	totalCost[np.logical_and(players==3,player==0)]/3, 
 	totalExpValue[np.logical_and(players==3,player==0)]/3,
@@ -144,6 +145,7 @@ tradespace('3', id[np.logical_and(players==3,player==0)],
 	run[np.logical_and(players==3,player==0)], 
 	isl[np.logical_and(players==3,player==0)], 
 	osgl[np.logical_and(players==3,player==0)])
+"""
 tradespace('1-1', id[np.logical_and(players==1,satellites==1)], 
 	cost[np.logical_and(players==1,satellites==1)], 
 	exp_value[np.logical_and(players==1,satellites==1)],
@@ -207,6 +209,7 @@ tradespace('2-6', id[np.logical_and.reduce((players==2, player==0, satellites==6
 	run[np.logical_and.reduce((players==2, player==0, satellites==6))], 
 	isl[np.logical_and.reduce((players==2, player==0, satellites==6))], 
 	osgl[np.logical_and.reduce((players==2,player==0, satellites==6))])
+"""
 tradespace('3-3', id[np.logical_and.reduce((players==3, player==0, satellites==3))], 
 	totalCost[np.logical_and.reduce((players==3, player==0, satellites==3))]/3, 
 	totalExpValue[np.logical_and.reduce((players==3, player==0, satellites==3))]/3,
@@ -221,3 +224,4 @@ tradespace('3-6', id[np.logical_and.reduce((players==3, player==0, satellites==6
 	run[np.logical_and.reduce((players==3, player==0, satellites==6))], 
 	isl[np.logical_and.reduce((players==3, player==0, satellites==6))], 
 	osgl[np.logical_and.reduce((players==3,player==0, satellites==6))])
+"""
