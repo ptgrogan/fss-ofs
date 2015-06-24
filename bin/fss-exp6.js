@@ -492,11 +492,8 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			enumSymmetricPxNSatDesigns(4,[1],[1],"pSGL","pISL"),
 			enumSymmetricPxNSatDesigns(5,[1],[1],"pSGL","pISL"),
 			enumSymmetricPxNSatDesigns(6,[1],[1],"pSGL","pISL"),
-			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"pSGL","oISL"),
 			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"oSGL","oISL"),
-			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"pSGL","oISL"),
 			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","oISL"),
-			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"pSGL","oISL"),
 			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL")
 		);
 	
@@ -551,56 +548,70 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			} else if(numPlayers>1) {
 				ops = ' -o n -f d ';
 			}
-			var exec = child_process.exec, child;
-			child = exec('node fss -d 24 -i 0 -p ' + numPlayers + ops
-					+ run + ' -s ' + seed, 
-					function(error, stdout, stderr) {
-						if (error !== null) {
-							logger.error('exec error: ' + error);
+			db.collection('exp6').find({run:run,seed:seed}, function(err, docs) {
+				if(err) {
+					logger.error(err);
+				}
+				if(docs.length > 0) {
+					db.collection('exp6s').insert(docs, function() {
+						execCounter++;
+						if(execCounter===runs.length) {
+							batchDone();
 						}
-						var values = stdout.replace('\n','').split(',');
-						var totalCost = 0;
-						var totalValue = 0;
-						_.each(values, function(value, player) {
-							totalCost += parseFloat(value.split(':')[0]);
-							totalValue += parseFloat(value.split(':')[1]);
-						});
-						var dbCounter = 0;
-						_.each(values, function(value, player) {
-							var initialCash = parseFloat(value.split(':')[0]);
-							var finalCash = parseFloat(value.split(':')[1]);
-							db.collection('exp6s').update(
-								{run: run, seed: seed, player: player},
-								{$set: 
-									{
-										initialCash: initialCash, 
-										finalCash: finalCash,
-										stations: (run.match(new RegExp((player+1)+'\\.GroundSta', 'g')) || []).length,
-										satellites: (run.match(new RegExp((player+1)+'\\.(?:Small|Medium|Large)Sat', 'g')) || []).length,
-										totalStations: (run.match(/GroundSta/g) || []).length,
-										totalSatellites: (run.match(/(?:Small|Medium|Large)Sat/g) || []).length,
-										isl: ((run.match(/ISL/g) || []).length>0),
-										players: numPlayers,
-										totalCost: totalCost,
-										totalValue: totalValue,
-									}
-								},
-								{ upsert: true },
-								function(err, result) {
-									if(err!==null) {
-										logger.error(err);
-									}
-									dbCounter++;
-									if(dbCounter===numPlayers) {
-										execCounter++;
-										if(execCounter===runs.length) {
-											batchDone();
-										}
-									}
-								}
-							);
-						});
 					});
+				} else {
+					var exec = child_process.exec, child;
+					child = exec('node fss -d 24 -i 0 -p ' + numPlayers + ops
+							+ run + ' -s ' + seed, 
+							function(error, stdout, stderr) {
+								if (error !== null) {
+									logger.error('exec error: ' + error);
+								}
+								var values = stdout.replace('\n','').split(',');
+								var totalCost = 0;
+								var totalValue = 0;
+								_.each(values, function(value, player) {
+									totalCost += parseFloat(value.split(':')[0]);
+									totalValue += parseFloat(value.split(':')[1]);
+								});
+								var dbCounter = 0;
+								_.each(values, function(value, player) {
+									var initialCash = parseFloat(value.split(':')[0]);
+									var finalCash = parseFloat(value.split(':')[1]);
+									db.collection('exp6s').update(
+										{run: run, seed: seed, player: player},
+										{$set: 
+											{
+												initialCash: initialCash, 
+												finalCash: finalCash,
+												stations: (run.match(new RegExp((player+1)+'\\.GroundSta', 'g')) || []).length,
+												satellites: (run.match(new RegExp((player+1)+'\\.(?:Small|Medium|Large)Sat', 'g')) || []).length,
+												totalStations: (run.match(/GroundSta/g) || []).length,
+												totalSatellites: (run.match(/(?:Small|Medium|Large)Sat/g) || []).length,
+												isl: ((run.match(/ISL/g) || []).length>0),
+												players: numPlayers,
+												totalCost: totalCost,
+												totalValue: totalValue,
+											}
+										},
+										{ upsert: true },
+										function(err, result) {
+											if(err!==null) {
+												logger.error(err);
+											}
+											dbCounter++;
+											if(dbCounter===numPlayers) {
+												execCounter++;
+												if(execCounter===runs.length) {
+													batchDone();
+												}
+											}
+										}
+									);
+								});
+							});
+				}
+			});
 		});
 	}
 })
