@@ -500,10 +500,7 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			enumSymmetricPxNSatDesigns(6,[1],[1],"pSGL","pISL"),
 			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"oSGL","oISL"),
 			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","oISL"),
-			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL"),
-			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"pSGL","oISL"),
-			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"pSGL","oISL"),
-			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"pSGL","oISL")
+			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL")
 		);
 	
 	//console.log(runs)

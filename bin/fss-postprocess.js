@@ -21,30 +21,23 @@ requirejs(['underscore','winston','mongojs','fs'], function(_,logger,mongo,fs) {
 	
 	// code below inherited from https://gist.github.com/RedBeard0531/1886960
 	var map = function() {
-		emit({run: this.run,
-			  players:this.players,
-			  player: this.player,
-			  stations: this.stations,
-			  isl: this.isl,
-			  init: this.initialCash,
-			  totalCost: this.totalCost
-			},
+		emit(this.run,
 			 {sum: this.finalCash,
 			  min: this.finalCash,
 			  max: this.finalCash,
 			  count:1,
 			  diff: 0, // M2,n:  sum((val-mean)^2)
-			  sum2: this.totalValue,
-			  min2: this.totalValue,
-			  max2: this.totalValue,
-			  diff2: this.totalValue,
-			});
+			  init: this.initialCash,
+			  stations: this.stations,
+			  isl: this.isl
+		});
 	}
 	 
 	var reduce = function(key, values) {
 		var a = values[0]; // will reduce into here
 		for (var i=1/*!*/; i < values.length; i++){
 			var b = values[i]; // will merge 'b' into 'a'
+	 
 	 
 			// temp helpers
 			var delta = a.sum/a.count - b.sum/b.count; // a.mean - b.mean
@@ -56,12 +49,6 @@ requirejs(['underscore','winston','mongojs','fs'], function(_,logger,mongo,fs) {
 			a.count += b.count;
 			a.min = Math.min(a.min, b.min);
 			a.max = Math.max(a.max, b.max);
-			
-			var delta2 = a.sum2/a.count - b.sum2/b.count;
-			a.diff2 += b.diff2 + delta2*delta2*weight;
-			a.sum2 += b.sum2;
-			a.min2 = Math.min(a.min2, b.min2);
-			a.max2 = Math.max(a.max2, b.max2);
 		}
 	 
 		return a;
@@ -72,36 +59,9 @@ requirejs(['underscore','winston','mongojs','fs'], function(_,logger,mongo,fs) {
 		value.variance = value.diff / value.count;
 		value.stddev = Math.sqrt(value.variance);
 		value.stderr = value.stddev / Math.sqrt(value.count);
-		value.avg2 = value.sum2 / value.count;
-		value.variance2 = value.diff2 / value.count;
-		value.stddev2 = Math.sqrt(value.variance2);
-		value.stderr2 = value.stddev2 / Math.sqrt(value.count);
 		return value;
 	}
 	// end inherited code
-	
-	/*
-	db.collection('results').aggregate([{
-		$group: {
-			_id:{run:"$run",seed:"$seed"},
-			totalCost:{$sum:"$initialCash"},
-			totalValue:{$sum:"$finalCash"}
-		}
-	}], function(err, result) {
-		_.each(result, function(item) {
-			db.collection('results').update(
-				{run: item._id.run, seed: item._id.seed}, 
-				{$set: {
-					totalCost: item.totalCost, 
-					totalValue: item.totalValue}
-				}, 
-				{multi:true}, 
-				function(err, res) { }
-			);
-		});
-	});
-	*/
-	
 	
 	db.collection('results').mapReduce(map, reduce, {finalize:finalize, out:{inline:1}}, function(err, result) {
 		if(err!==null) {
@@ -109,19 +69,17 @@ requirejs(['underscore','winston','mongojs','fs'], function(_,logger,mongo,fs) {
 		} else {
 			var stream = fs.createWriteStream('data.csv');
 			stream.once('open', function(fd) {
-				stream.write(['Run', 'Players', 'Player', 'Stations', 'ISL', 'Cost', 'Count', 'Min', 
-						'Max', 'Avg', 'StdDev', 'StdErr', 'Total Cost','Total Value Avg','Total Value StdErr'].join()+'\n');
+				stream.write(['Run', 'Stations', 'ISL', 'Cost', 'Count', 'Min', 
+						'Max', 'Avg', 'StdDev', 'StdErr'].join()+'\n');
 				_.each(result, function(item) {
-					stream.write([item._id.run, item._id.players, item._id.player, item._id.stations, item._id.isl,
-							item._id.init, item.value.count, item.value.min, 
+					stream.write([item._id, item.value.stations, item.value.isl,
+							item.value.init, item.value.count, item.value.min, 
 							item.value.max, item.value.avg, item.value.stddev, 
-							item.value.stderr, item._id.totalCost, item.value.avg2, 
-							item.value.stderr2].join()+'\n');
+							item.value.stderr].join()+'\n');
 				});
 				stream.end();
 			});
 		}
 		db.close();
 	});
-	
 })
