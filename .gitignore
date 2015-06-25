@@ -4,3 +4,4 @@ npm-debug.log
 /bin/data.csv
 /bin/tradespace.pdf
 bin/data-exp.csv
+*.png

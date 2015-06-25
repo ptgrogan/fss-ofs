@@ -19,6 +19,7 @@
 import csv
 import re
 import numpy as np
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 
 id = np.array([])
@@ -64,6 +65,18 @@ with open('data-exp.csv','rb') as csvfile:
     exp_value = exp_value - cost
     totalExpValue = totalExpValue - totalCost
 
+def pareto(id, cost, exp_value, std_err):
+	p_id = np.array([])
+	p_cost = np.array([])
+	p_value = np.array([])
+	for i in range(0,np.size(cost)):
+		if  exp_value[i] > 0 and np.sum(np.logical_and(cost<=cost[i], 
+				exp_value-1.96*std_err>exp_value[i]+1.96*std_err[i])) == 0:
+			p_id = np.append(p_id, id[i])
+			p_cost = np.append(p_cost, cost[i])
+			p_value = np.append(p_value, exp_value[i])
+	return p_id, p_cost, p_value
+
 def tradespace(label, id, cost, exp_value, std_err, run, isl, osgl):
 	plt.clf()
 	plt.rcParams.update({'axes.labelsize':8, 
@@ -102,7 +115,7 @@ def tradespace(label, id, cost, exp_value, std_err, run, isl, osgl):
 	plt.plot(cost[np.logical_and(isl,osgl)], 
 		exp_value[np.logical_and(isl,osgl)], 
 		ls='', marker='.',mec='none',color=[0,1,0,.3])
-
+	"""
 	for i in range(0,np.size(run)):
 		if not osgl[i] and np.sum(np.logical_and(cost[osgl==False]<=cost[i], exp_value[osgl==False]>exp_value[i])) == 0:
 			plt.annotate('%0d'%id[i], xy=(cost[i], exp_value[i]),
@@ -112,10 +125,55 @@ def tradespace(label, id, cost, exp_value, std_err, run, isl, osgl):
 			plt.annotate('%0d'%id[i], xy=(cost[i], exp_value[i]),
 						xytext=(-5,4), textcoords='offset points', size=8,
 						color='g' if isl[i] else 'r')
+	"""
+	if np.size(id[np.logical_and(osgl==False,isl==False)])>0:
+		p_id, p_cost, p_value = pareto(id[np.logical_and(osgl==False,isl==False)], 
+				cost[np.logical_and(osgl==False,isl==False)], 
+				exp_value[np.logical_and(osgl==False,isl==False)], 
+				std_err[np.logical_and(osgl==False,isl==False)])
+		for i in range(0,np.size(p_id)):
+			plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+						xytext=(-5,4), textcoords='offset points', size=8, color='k')
+		m, b, r, p, se = stats.linregress(p_cost, p_value)
+		x_r = np.linspace(np.amin(p_cost), np.amax(p_cost), 100)
+		plt.plot(x_r, b + m*x_r,ls='-',color=[0,0,0,.3])
+	if np.size(id[np.logical_and(osgl==False,isl==True)])>0:
+		p_id, p_cost, p_value = pareto(id[np.logical_and(osgl==False,isl==True)], 
+				cost[np.logical_and(osgl==False,isl==True)], 
+				exp_value[np.logical_and(osgl==False,isl==True)], 
+				std_err[np.logical_and(osgl==False,isl==True)])
+		for i in range(0,np.size(p_id)):
+			plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+						xytext=(-5,4), textcoords='offset points', size=8, color='b')
+		m, b, r, p, se = stats.linregress(p_cost, p_value)
+		x_r = np.linspace(np.amin(p_cost), np.amax(p_cost), 100)
+		plt.plot(x_r, b + m*x_r,ls='-',color=[0,0,1,.3])
+	if np.size(id[np.logical_and(osgl==True,isl==False)])>0:
+		p_id, p_cost, p_value = pareto(id[np.logical_and(osgl==True,isl==False)], 
+				cost[np.logical_and(osgl==True,isl==False)], 
+				exp_value[np.logical_and(osgl==True,isl==False)], 
+				std_err[np.logical_and(osgl==True,isl==False)])
+		for i in range(0,np.size(p_id)):
+			plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+						xytext=(-5,4), textcoords='offset points', size=8, color='r')
+		m, b, r, p, se = stats.linregress(p_cost, p_value)
+		x_r = np.linspace(np.amin(p_cost), np.amax(p_cost), 100)
+		plt.plot(x_r, b + m*x_r,ls='-',color=[1,0,0,.3])
+	if np.size(id[np.logical_and(osgl==True,isl==True)])>0:
+		p_id, p_cost, p_value = pareto(id[np.logical_and(osgl==True,isl==True)], 
+				cost[np.logical_and(osgl==True,isl==True)], 
+				exp_value[np.logical_and(osgl==True,isl==True)], 
+				std_err[np.logical_and(osgl==True,isl==True)])
+		for i in range(0,np.size(p_id)):
+			plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+						xytext=(-5,4), textcoords='offset points', size=8, color='g')
+		m, b, r, p, se = stats.linregress(p_cost, p_value)
+		x_r = np.linspace(np.amin(p_cost), np.amax(p_cost), 100)
+		plt.plot(x_r, b + m*x_r,ls='-',color=[0,1,0,.3])
 	plt.xlabel('Initial Cost ($\S$)')
 	plt.ylabel('Net Expected Value ($\S$)')
 	plt.xlim([1000, 5000])
-	plt.ylim([-1000, 8000])
+	plt.ylim([-1000, 10000])
 	#plt.xscale('log')
 	#plt.yscale('log')
 	plt.grid()
@@ -123,20 +181,22 @@ def tradespace(label, id, cost, exp_value, std_err, run, isl, osgl):
 	plt.savefig(label+'-exp-ts.png', dpi=300)
 	#plt.savefig(label+'-exp-ts.pdf')
 	
-tradespace('1', id[players==1], 
-	cost[players==1], 
-	exp_value[players==1],
-	std_err[players==1], 
-	run[players==1], 
-	isl[players==1], 
-	osgl[players==1])
-tradespace('2', id[np.logical_and(players==2,player==0)], 
-	totalCost[np.logical_and(players==2,player==0)]/2, 
-	totalExpValue[np.logical_and(players==2,player==0)]/2,
-	totalStdErr[np.logical_and(players==2,player==0)]/2, 
-	run[np.logical_and(players==2,player==0)], 
-	isl[np.logical_and(players==2,player==0)], 
-	osgl[np.logical_and(players==2,player==0)])
+if np.size(id[players==1]) > 0:
+	tradespace('1', id[players==1], 
+		cost[players==1], 
+		exp_value[players==1],
+		std_err[players==1], 
+		run[players==1], 
+		isl[players==1], 
+		osgl[players==1])
+if np.size(id[np.logical_and(players==2,player==0)]) > 0:
+	tradespace('2', id[np.logical_and(players==2,player==0)], 
+		totalCost[np.logical_and(players==2,player==0)]/2, 
+		totalExpValue[np.logical_and(players==2,player==0)]/2,
+		totalStdErr[np.logical_and(players==2,player==0)]/2, 
+		run[np.logical_and(players==2,player==0)], 
+		isl[np.logical_and(players==2,player==0)], 
+		osgl[np.logical_and(players==2,player==0)])
 """
 tradespace('3', id[np.logical_and(players==3,player==0)], 
 	totalCost[np.logical_and(players==3,player==0)]/3, 
@@ -145,7 +205,6 @@ tradespace('3', id[np.logical_and(players==3,player==0)],
 	run[np.logical_and(players==3,player==0)], 
 	isl[np.logical_and(players==3,player==0)], 
 	osgl[np.logical_and(players==3,player==0)])
-"""
 tradespace('1-1', id[np.logical_and(players==1,satellites==1)], 
 	cost[np.logical_and(players==1,satellites==1)], 
 	exp_value[np.logical_and(players==1,satellites==1)],
@@ -209,7 +268,6 @@ tradespace('2-6', id[np.logical_and.reduce((players==2, player==0, satellites==6
 	run[np.logical_and.reduce((players==2, player==0, satellites==6))], 
 	isl[np.logical_and.reduce((players==2, player==0, satellites==6))], 
 	osgl[np.logical_and.reduce((players==2,player==0, satellites==6))])
-"""
 tradespace('3-3', id[np.logical_and.reduce((players==3, player==0, satellites==3))], 
 	totalCost[np.logical_and.reduce((players==3, player==0, satellites==3))]/3, 
 	totalExpValue[np.logical_and.reduce((players==3, player==0, satellites==3))]/3,
