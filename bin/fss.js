@@ -50,14 +50,14 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
 			designSets[index] = [];
 		});
 		
-        _.each(argv._, function(design) {
+        _.each(argv._, function(design, designId) {
             var specs = design.split(",");
             if(specs.length > 0 && specs[0].split("@").length === 2) {
                 var systemType;
 				var fedInd = 0;
                 if(specs[0].split("@")[0].split(".").length === 2) {
                     // determine player ownership
-                    var fedInd = parseInt(specs[0].split("@")[0].split(".")[0],10)-1;
+                    fedInd = parseInt(specs[0].split("@")[0].split(".")[0],10)-1;
                     systemType = specs[0].split("@")[0].split(".")[1];
                 } else {
                     // default to player 1 ownership
@@ -68,9 +68,11 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
                 var system;
                 if(def = _.findWhere(game.stationTypes, {type: systemType})) {
                     system = new fss.GroundStation(def);
+					
                 } else if(def = _.findWhere(game.spacecraftTypes, {type: systemType})) {
                     system = new fss.Spacecraft(def);
                 }
+				system.id = '(' + (designId+1) + ')' + system.type;
                 
                 if(system && location) {
                     var subsystems = [];
