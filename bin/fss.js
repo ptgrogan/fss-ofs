@@ -32,8 +32,8 @@ requirejs(['underscore','logger','mas','fss-ofs','game'], function(_,logger,mas,
     });
     var context = game.buildContext(
             (argv.s&&_.isNumber(argv.s))?argv.s:0,
-            argv.o==='d'?'dynamic':(argv.o==='n'?'none':'simple'),
-			argv.f==='d'?'dynamic':'none');
+            argv.o?argv.o:'d6',
+			argv.f?argv.f:undefined);
     
     // define the simulator
     var sim = new mas.sim.Simulator({

@@ -330,7 +330,7 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
      */
 	function enum1xNSatDesigns(number, player, sector, sgl, isl) {
 		// enumerate all satellites
-		return _.map(enum1xNSats(number, player, sector, sgl, isl), 
+		return _.map(enum1xNSats(number, player, (sector-1+(6-1))%6+1, sgl, isl), 
 				function(sats) {
 					// return design as sats plus sized station
 					return [sats.join(" "), sizeStation(player,sector,sgl,sats)].join(" ");
@@ -414,12 +414,15 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
      * @returns {Array} The set of satellite designs.
      */
 	function enumPxNSatDesigns(number, players, sectors, sgl, isl) {
-		return _.map(enumPxNSats(number, players, sectors, sgl, isl), 
-			function(pSats) {
-				return _.map(pSats, function(sats, i) {
-					return [sats.join(" "), sizeStation(players[i],sectors[i],sgl,sats)].join(" ");
-				}).join(" ");
-			});
+		return _.map(enumPxNSats(number, players, _.map(sectors, 
+				function(sector) { 
+					return (sector-1+(6-1))%6+1;
+				}), sgl, isl), 
+				function(pSats) {
+					return _.map(pSats, function(sats, i) {
+						return [sats.join(" "), sizeStation(players[i],sectors[i],sgl,sats)].join(" ");
+					}).join(" ");
+				});
 	}
 	
     /**
@@ -453,7 +456,10 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
      * @returns {Array} The set of satellite designs.
      */
 	function enumSymmetricPxNSatDesigns(number, players, sectors, sgl, isl) {
-		return _.map(enumSymmetricPxNSats(number, players, sectors, sgl, isl), 
+		return _.map(enumSymmetricPxNSats(number, players, _.map(sectors, 
+				function(sector) { 
+					return (sector-1+(6-1))%6+1;
+				}), sgl, isl), 
 			function(pSats) {
 				return _.map(pSats, function(sats, i) {
 					return [sats.join(" "), sizeStation(players[i],sectors[i],sgl,sats)].join(" ");
@@ -544,73 +550,59 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			var numPlayers = parseInt(_.max(run.match(/(\d)\./g)))
 			var ops = ' ';
 			if(numPlayers===1) {
-				ops = ' -o d ';
+				ops = ' -o d6 ';
 			} else if(numPlayers>1) {
-				ops = ' -o n -f d ';
+				ops = ' -o n -f d6 ';
 			}
-			db.collection('exp6').find({run:run,seed:seed}, function(err, docs) {
-				if(err) {
-					logger.error(err);
+			var exec = child_process.exec, child;
+			var command = 'node fss -d 24 -i 0 -p ' + numPlayers + ops
+					+ run + ' -s ' + seed;
+			child = exec(command, function(error, stdout, stderr) {
+				if (error !== null) {
+					logger.error('exec error: ' + error);
 				}
-				if(docs.length > 0) {
-					db.collection('exp6s').insert(docs, function() {
-						execCounter++;
-						if(execCounter===runs.length) {
-							batchDone();
-						}
-					});
-				} else {
-					var exec = child_process.exec, child;
-					child = exec('node fss -d 24 -i 0 -p ' + numPlayers + ops
-							+ run + ' -s ' + seed, 
-							function(error, stdout, stderr) {
-								if (error !== null) {
-									logger.error('exec error: ' + error);
+				var values = stdout.replace('\n','').split(',');
+				var totalCost = 0;
+				var totalValue = 0;
+				_.each(values, function(value, player) {
+					totalCost += parseFloat(value.split(':')[0]);
+					totalValue += parseFloat(value.split(':')[1]);
+				});
+				var dbCounter = 0;
+				_.each(values, function(value, player) {
+					var initialCash = parseFloat(value.split(':')[0]);
+					var finalCash = parseFloat(value.split(':')[1]);
+					db.collection('exp6s').update(
+						{run: run, seed: seed, player: player},
+						{$set: 
+							{
+								initialCash: initialCash, 
+								finalCash: finalCash,
+								stations: (run.match(new RegExp((player+1)+'\\.GroundSta', 'g')) || []).length,
+								satellites: (run.match(new RegExp((player+1)+'\\.(?:Small|Medium|Large)Sat', 'g')) || []).length,
+								totalStations: (run.match(/GroundSta/g) || []).length,
+								totalSatellites: (run.match(/(?:Small|Medium|Large)Sat/g) || []).length,
+								isl: ((run.match(/ISL/g) || []).length>0),
+								players: numPlayers,
+								totalCost: totalCost,
+								totalValue: totalValue,
+							}
+						},
+						{ upsert: true },
+						function(err, result) {
+							if(err!==null) {
+								logger.error(err);
+							}
+							dbCounter++;
+							if(dbCounter===numPlayers) {
+								execCounter++;
+								if(execCounter===runs.length) {
+									batchDone();
 								}
-								var values = stdout.replace('\n','').split(',');
-								var totalCost = 0;
-								var totalValue = 0;
-								_.each(values, function(value, player) {
-									totalCost += parseFloat(value.split(':')[0]);
-									totalValue += parseFloat(value.split(':')[1]);
-								});
-								var dbCounter = 0;
-								_.each(values, function(value, player) {
-									var initialCash = parseFloat(value.split(':')[0]);
-									var finalCash = parseFloat(value.split(':')[1]);
-									db.collection('exp6s').update(
-										{run: run, seed: seed, player: player},
-										{$set: 
-											{
-												initialCash: initialCash, 
-												finalCash: finalCash,
-												stations: (run.match(new RegExp((player+1)+'\\.GroundSta', 'g')) || []).length,
-												satellites: (run.match(new RegExp((player+1)+'\\.(?:Small|Medium|Large)Sat', 'g')) || []).length,
-												totalStations: (run.match(/GroundSta/g) || []).length,
-												totalSatellites: (run.match(/(?:Small|Medium|Large)Sat/g) || []).length,
-												isl: ((run.match(/ISL/g) || []).length>0),
-												players: numPlayers,
-												totalCost: totalCost,
-												totalValue: totalValue,
-											}
-										},
-										{ upsert: true },
-										function(err, result) {
-											if(err!==null) {
-												logger.error(err);
-											}
-											dbCounter++;
-											if(dbCounter===numPlayers) {
-												execCounter++;
-												if(execCounter===runs.length) {
-													batchDone();
-												}
-											}
-										}
-									);
-								});
-							});
-				}
+							}
+						}
+					);
+				});
 			});
 		});
 	}

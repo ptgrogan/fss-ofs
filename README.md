@@ -34,7 +34,9 @@ Also please refer to [node-gyp documentation](https://github.com/TooTallNate/nod
  * `-l` Sets the logging level. Select from {none, error, info, verbose, debug}. Default: `-l error`
  * `-p` Sets the number of players. Must be a positive integer. Default: `-p 1`
  * `-o` Sets the federate operational model. Select from {d,s,n} for dynamic (integer program), simple (heuristic), or none. Default: `-o s`
+   * Specify dynamic planning horizon (turns) after `d`, e.g. `h6` for 6 turns. Default: `h6`. 
  * `-f` Sets the federation operational model. Select from {d,n} for dynamic (integer program) or none. Default: `-f n`
+   * Specify dynamic planning horizon (turns) after `d`, e.g. `h6` for 6 turns. Default: `h6`. 
  * `P.SysName@LOC,Sub1,Sub2,SubN` Defines a system controlled by player `P` (positive integer) of system type `SysName`, instantiated at location `LOC` with subsystems `Sub1`, `Sub2`, and `SubN`.
    * Available Systems:
      * `GroundSta`: Ground station with capacity for 3 subsystem modules. Costs 500 to design and 0 to commission on the surface.
