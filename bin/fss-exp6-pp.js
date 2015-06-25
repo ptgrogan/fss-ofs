@@ -38,7 +38,7 @@ requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,lo
 			  sum2: this.totalValue,
 			  min2: this.totalValue,
 			  max2: this.totalValue,
-			  diff2: this.totalValue,
+			  diff2: 0,
 			});
 	}
 	 
@@ -49,19 +49,18 @@ requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,lo
 	 
 			// temp helpers
 			var delta = a.sum/a.count - b.sum/b.count; // a.mean - b.mean
+			var delta2 = a.sum2/a.count - b.sum2/b.count;
 			var weight = (a.count * b.count)/(a.count + b.count);
 			
 			// do the reducing
 			a.diff += b.diff + delta*delta*weight;
+			a.diff2 += b.diff2 + delta2*delta2*weight;
 			a.sum += b.sum;
+			a.sum2 += b.sum2;
 			a.count += b.count;
 			a.min = Math.min(a.min, b.min);
-			a.max = Math.max(a.max, b.max);
-			
-			var delta2 = a.sum2/a.count - b.sum2/b.count;
-			a.diff2 += b.diff2 + delta2*delta2*weight;
-			a.sum2 += b.sum2;
 			a.min2 = Math.min(a.min2, b.min2);
+			a.max = Math.max(a.max, b.max);
 			a.max2 = Math.max(a.max2, b.max2);
 		}
 	 
@@ -70,12 +69,12 @@ requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,lo
 	 
 	var finalize = function(key, value){ 
 		value.avg = value.sum / value.count;
-		value.variance = value.diff / value.count;
-		value.stddev = Math.sqrt(value.variance);
-		value.stderr = value.stddev / Math.sqrt(value.count);
 		value.avg2 = value.sum2 / value.count;
+		value.variance = value.diff / value.count;
 		value.variance2 = value.diff2 / value.count;
+		value.stddev = Math.sqrt(value.variance);
 		value.stddev2 = Math.sqrt(value.variance2);
+		value.stderr = value.stddev / Math.sqrt(value.count);
 		value.stderr2 = value.stddev2 / Math.sqrt(value.count);
 		return value;
 	}
