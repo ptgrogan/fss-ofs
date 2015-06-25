@@ -16,15 +16,16 @@
  
 var requirejs = require('requirejs');
 
-requirejs(['underscore','winston','mongojs','fs'], function(_,logger,mongo,fs) {
-	var db = mongo("fss", ["results"]);
+requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,logger,child_process,mongo,fs) {
+	var db = mongo("fss", ["exp45"]);
 	
 	// code below inherited from https://gist.github.com/RedBeard0531/1886960
 	var map = function() {
 		emit({run: this.run,
 			  players:this.players,
 			  player: this.player,
-			  stations: this.stations,
+			  stations: this.totalStations,
+			  satellites: this.totalSatellites,
 			  isl: this.isl,
 			  init: this.initialCash,
 			  totalCost: this.totalCost
@@ -103,20 +104,52 @@ requirejs(['underscore','winston','mongojs','fs'], function(_,logger,mongo,fs) {
 	*/
 	
 	
-	db.collection('results').mapReduce(map, reduce, {finalize:finalize, out:{inline:1}}, function(err, result) {
+	db.collection('exp5').mapReduce(map, reduce, {finalize:finalize, out:{inline:1}}, function(err, result) {
 		if(err!==null) {
 			logger.error(err);
 		} else {
-			var stream = fs.createWriteStream('data.csv');
+			result.sort(function(a,b) {
+				if(a._id.players === b._id.players) {
+					if(a._id.player === b._id.player) {
+						if(a._id.satellites === b._id.satellites) {
+							return a._id.totalCost - b._id.totalCost;
+						} else {
+							return a._id.satellites - b._id.satellites;
+						}
+					} else {
+						return a._id.player - b._id.player;
+					}
+				} else {
+					return a._id.players - b._id.players;
+				}
+				
+			});
+			var stream = fs.createWriteStream('data-exp.csv');
 			stream.once('open', function(fd) {
-				stream.write(['Run', 'Players', 'Player', 'Stations', 'ISL', 'Cost', 'Count', 'Min', 
+				stream.write(['Run', 'Players', 'Player', 'Satellites', 'Stations', 'ISL', 'Cost', 'Count', 'Min', 
 						'Max', 'Avg', 'StdDev', 'StdErr', 'Total Cost','Total Value Avg','Total Value StdErr'].join()+'\n');
 				_.each(result, function(item) {
-					stream.write([item._id.run, item._id.players, item._id.player, item._id.stations, item._id.isl,
+					stream.write([item._id.run.replace(/,/g,'|'), item._id.players, item._id.player, 
+							item._id.satellites, item._id.stations, item._id.isl,
 							item._id.init, item.value.count, item.value.min, 
 							item.value.max, item.value.avg, item.value.stddev, 
 							item.value.stderr, item._id.totalCost, item.value.avg2, 
 							item.value.stderr2].join()+'\n');
+				});
+				stream.on('finish', function() {
+					var exec = child_process.exec, child;
+					child = exec('python fss-exp5-pp.py', 
+							function(error, stdout, stderr) {
+								if(error) {
+									logger.error(error);
+								}
+								if(stdout) {
+									logger.error(stderr);
+								}
+								if(stdout) {
+									logger.info(stdout);
+								}
+							})
 				});
 				stream.end();
 			});
