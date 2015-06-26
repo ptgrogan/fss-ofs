@@ -485,6 +485,11 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","oISL"),
 			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL")
 		);
+	var runs = _.union(
+			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"oSGL","pISL"),
+			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","pISL"),
+			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","pISL")
+		);
 	
 	var start = _.isNumber(argv.start)?argv.start:0;
 	var stop = _.isNumber(argv.stop)?argv.stop:100;

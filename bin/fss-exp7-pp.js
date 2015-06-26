@@ -88,10 +88,10 @@ requirejs(['underscore','winston','child_process','mongojs','fs'], function(_,lo
 			result.sort(function(a,b) {
 				if(a._id.players === b._id.players) {
 					if(a._id.player === b._id.player) {
-						if(a._id.satellites === b._id.satellites) {
-							return a._id.totalCost - b._id.totalCost;
-						} else {
+						if(a._id.totalCost === b._id.totalCost) {
 							return a._id.satellites - b._id.satellites;
+						} else {
+							return a._id.totalCost - b._id.totalCost;
 						}
 					} else {
 						return a._id.player - b._id.player;
