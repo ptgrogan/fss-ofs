@@ -89,7 +89,7 @@ def pareto(id, cost, exp_value, std_err):
 				p_exp = np.append(p_exp, False)
 	return p_id, p_cost, p_value, p_exp
 	
-def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
+def tradespaceIndependent(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 	plt.clf()
 						
 	plt.errorbar(cost[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
@@ -100,6 +100,50 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 		exp_value[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
 		yerr=1.96*std_err[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))],
 		fmt='none',color='b',ecolor='b', alpha=0.3)
+		
+	plt.plot(cost[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
+		exp_value[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
+		ls='', marker='.',mec='none',color='k', alpha=0.3)
+	plt.plot(cost[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
+		exp_value[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
+		ls='', marker='.',mec='none',color='b', alpha=0.3)
+		
+	P_id, P_cost, P_value, P_exp = pareto(id, cost, exp_value, std_err)
+	
+	p_id, p_cost, p_value, p_exp = pareto(
+			id[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
+			cost[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
+			exp_value[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
+			std_err[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))])
+	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-k', alpha=0.3)
+	for i in np.intersect1d(P_id[P_exp==True],p_id[p_exp==True]):
+		plt.annotate('%0d'%i, xy=(p_cost[p_id==i], p_value[p_id==i]),
+					xytext=(-5,4), textcoords='offset points', size=8, color='k')
+					
+	p_id, p_cost, p_value, p_exp = pareto(
+			id[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
+			cost[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
+			exp_value[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
+			std_err[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))])
+	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-b', alpha=0.3)
+	for i in np.intersect1d(P_id[P_exp==True],p_id[p_exp==True]):
+		plt.annotate('%0d'%i, xy=(p_cost[p_id==i], p_value[p_id==i]),
+					xytext=(-5,4), textcoords='offset points', size=8, color='b')
+	
+	plt.plot(P_cost[P_exp==True],P_value[P_exp==True],ls='--',color=[.3,.3,.3])
+		
+	plt.xlabel('Initial Cost ($\S$)')
+	plt.ylabel('24-turn Expected Revenue ($\S$)')
+	plt.xlim([1000, 4000])
+	plt.ylim([0, 12000])
+	plt.legend(['pSGL','pSGL and pISL'],loc='upper left')
+	plt.grid()
+	plt.gcf().set_size_inches(6.5, 3.5)
+	plt.savefig(label+'-exp-ts.png', bbox_inches='tight', dpi=300)
+
+def tradespaceCentralized(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
+	plt.clf()
+						
 	plt.errorbar(cost[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))], 
 		exp_value[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))], 
 		yerr=1.96*std_err[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))],
@@ -117,12 +161,6 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 		yerr=1.96*std_err[np.logical_and.reduce((pisl==False,oisl==True,osgl==True))],
 		fmt='none',color='y',ecolor='y', alpha=0.3)
 		
-	plt.plot(cost[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
-		exp_value[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
-		ls='', marker='.',mec='none',color='k', alpha=0.3)
-	plt.plot(cost[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
-		exp_value[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
-		ls='', marker='.',mec='none',color='b', alpha=0.3)
 	plt.plot(cost[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))], 
 		exp_value[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))], 
 		ls='', marker='.',mec='none',color='g', alpha=0.3)
@@ -136,25 +174,7 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 		exp_value[np.logical_and.reduce((pisl==False,oisl==True,osgl==True))], 
 		ls='', marker='.',mec='none',color='y', alpha=0.3)
 	
-	p_id, p_cost, p_value, p_exp = pareto(
-			id[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
-			cost[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
-			exp_value[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))], 
-			std_err[np.logical_and.reduce((pisl==False,oisl==False,osgl==False))])
-	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-k', alpha=0.3)
-	for i in range(0,np.size(p_id)):
-		plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
-					xytext=(-5,4), textcoords='offset points', size=8, color='k')
-					
-	p_id, p_cost, p_value, p_exp = pareto(
-			id[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
-			cost[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
-			exp_value[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))], 
-			std_err[np.logical_and.reduce((pisl==True,oisl==False,osgl==False))])
-	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-b', alpha=0.3)
-	for i in range(0,np.size(p_id)):
-		plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
-					xytext=(-5,4), textcoords='offset points', size=8, color='b')
+	P_id, P_cost, P_value, P_exp = pareto(id, cost, exp_value, std_err)
 	
 	p_id, p_cost, p_value, p_exp = pareto(
 			id[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))], 
@@ -162,8 +182,8 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 			exp_value[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))], 
 			std_err[np.logical_and.reduce((pisl==False,oisl==True,osgl==False))])
 	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-g', alpha=0.3)
-	for i in range(0,np.size(p_id)):
-		plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+	for i in np.intersect1d(P_id[P_exp==True],p_id[p_exp==True]):
+		plt.annotate('%0d'%i, xy=(p_cost[p_id==i], p_value[p_id==i]),
 					xytext=(-5,4), textcoords='offset points', size=8, color='g')
 
 	p_id, p_cost, p_value, p_exp = pareto(
@@ -172,8 +192,8 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 			exp_value[np.logical_and.reduce((pisl==False,oisl==False,osgl==True))], 
 			std_err[np.logical_and.reduce((pisl==False,oisl==False,osgl==True))])
 	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-r', alpha=0.3)
-	for i in range(0,np.size(p_id)):
-		plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+	for i in np.intersect1d(P_id[P_exp==True],p_id[p_exp==True]):
+		plt.annotate('%0d'%i, xy=(p_cost[p_id==i], p_value[p_id==i]),
 					xytext=(-5,4), textcoords='offset points', size=8, color='r')
 
 	p_id, p_cost, p_value, p_exp = pareto(
@@ -182,8 +202,8 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 			exp_value[np.logical_and.reduce((pisl==True,oisl==False,osgl==True))], 
 			std_err[np.logical_and.reduce((pisl==True,oisl==False,osgl==True))])
 	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-m', alpha=0.3)
-	for i in range(0,np.size(p_id)):
-		plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+	for i in np.intersect1d(P_id[P_exp==True],p_id[p_exp==True]):
+		plt.annotate('%0d'%i, xy=(p_cost[p_id==i], p_value[p_id==i]),
 					xytext=(-5,4), textcoords='offset points', size=8, color='m')
 					
 	p_id, p_cost, p_value, p_exp = pareto(
@@ -192,27 +212,25 @@ def tradespace(label, id, cost, exp_value, std_err, run, pisl, oisl, osgl):
 			exp_value[np.logical_and.reduce((pisl==False,oisl==True,osgl==True))], 
 			std_err[np.logical_and.reduce((pisl==False,oisl==True,osgl==True))])
 	#plt.plot(p_cost[p_exp==True],p_value[p_exp==True],'.-y', alpha=0.3)
-	for i in range(0,np.size(p_id)):
-		plt.annotate('%0d'%p_id[i], xy=(p_cost[i], p_value[i]),
+	for i in np.intersect1d(P_id[P_exp==True],p_id[p_exp==True]):
+		plt.annotate('%0d'%i, xy=(p_cost[p_id==i], p_value[p_id==i]),
 					xytext=(-5,4), textcoords='offset points', size=8, color='y')
 					
-	p_id, p_cost, p_value, p_exp = pareto(id, cost, exp_value, std_err)
-	plt.plot(p_cost[p_exp==True],p_value[p_exp==True],ls='--',color=[.3,.3,.3])
+	plt.plot(P_cost[P_exp==True],P_value[P_exp==True],ls='--',color=[.3,.3,.3])
 		
 	plt.xlabel('Initial Cost ($\S$)')
-	#plt.ylabel('Net Expected Value ($\S$)')
-	plt.ylabel('Expected Value over 24 Turns ($\S$)')
+	plt.ylabel('24-turn Expected Revenue ($\S$)')
 	plt.xlim([1000, 4000])
-	plt.ylim([1000, 12000])
-	plt.legend(['pSGL','pSGL and pISL', 'pSGL and oISL', 'oSGL', 'oSGL and pISL', 'oSGL and oISL'],loc='upper left')
+	plt.ylim([0, 12000])
+	plt.legend(['pSGL and oISL', 'oSGL', 'oSGL and pISL', 'oSGL and oISL'],loc='upper left')
 	plt.grid()
 	plt.gcf().set_size_inches(6.5, 3.5)
-	plt.savefig(label+'-exp-ts.png', dpi=300)
+	plt.savefig(label+'-exp-ts.png', bbox_inches='tight', dpi=300)
 	
 independent = np.logical_and.reduce((players==2,player==0,oisl==False,osgl==False))
 centralized = np.logical_and.reduce((players==2,player==0,np.logical_or(oisl,osgl)))
 if np.size(id[independent]) > 0:
-	tradespace('2i', id[independent], 
+	tradespaceIndependent('2i', id[independent], 
 		totalCost[independent]/2, 
 		totalExpValue[independent]/2,
 		totalStdErr[independent]/2, 
@@ -221,7 +239,7 @@ if np.size(id[independent]) > 0:
 		oisl[independent], 
 		osgl[independent])
 if np.size(id[centralized]) > 0:
-	tradespace('2c', id[centralized], 
+	tradespaceCentralized('2c', id[centralized], 
 		totalCost[centralized]/2, 
 		totalExpValue[centralized]/2,
 		totalStdErr[centralized]/2, 
@@ -229,7 +247,6 @@ if np.size(id[centralized]) > 0:
 		pisl[centralized], 
 		oisl[centralized], 
 		osgl[centralized])
-		
 
 i_id, i_cost, i_value, i_exp = pareto(id[independent], 
 		totalCost[independent]/2, 
@@ -248,12 +265,12 @@ for i in c_id:
 		for design in run[independent]:
 			if query in design:
 				x_value = np.append(x_value, totalExpValue[np.logical_and(run==design,player==0)]/2)
-				
-plt.clf()
+			
 
 x = np.linspace(max(np.amin(i_cost[i_exp==True]), np.amin(c_cost[c_exp==True])), 
 		max(np.amax(i_cost[i_exp==True]), np.amax(c_cost[c_exp==True])))
-
+	
+plt.clf()
 plt.fill_between(x, np.interp(x, i_cost[i_exp==True],i_value[i_exp==True]), 
 		np.interp(x, c_cost[c_exp==True], c_value[c_exp==True]), color='none', hatch='/', edgecolor=[.3,.3,.3,.5], linewidth=0.0)
 plt.fill_between(x, np.interp(x, c_cost[c_exp==True],x_value[c_exp==True]), 
@@ -263,14 +280,39 @@ plt.plot(c_cost[c_exp==True], c_value[c_exp==True], '--k')
 plt.plot(c_cost[c_exp==True], x_value[c_exp==True], '--r')
 
 plt.annotate('Upside Potential of FSS Success', xy=(2600, 7500), size=8, color='k')
-plt.annotate('Downside Risk of FSS Failure', xy=(2000, 2750), xytext=(2250,2000), 
+plt.annotate('Downside Risk of FSS Failure', xy=(2125, 3000), xytext=(2375,2250), 
 		textcoords='data', arrowprops=dict(arrowstyle='->',connectionstyle='arc3',ec='r'), size=8, color='r')
 
 plt.xlabel('Initial Cost ($\S$)')
-plt.ylabel('Expected Value over 24 Turns ($\S$)')
+plt.ylabel('24-turn Expected Revenue ($\S$)')
 plt.xlim([1000, 4000])
-plt.ylim([1000, 12000])
-plt.legend(['Independent Pareto Front','Centralized Pareto Front (FSS Success)','Centralized Pareto Front (FSS Failure)'],loc='upper left')
+plt.ylim([0, 12000])
+plt.legend(['Independent Pareto Front ($V_i$)','Centralized Pareto Front, FSS Success ($V_c$)','Centralized Pareto Front, FSS Failure  ($V_x$)'],loc='upper left')
 plt.grid()
 plt.gcf().set_size_inches(6.5, 3.5)
-plt.savefig('2-exp.png', dpi=300)
+plt.savefig('2-exp.png', bbox_inches='tight', dpi=300)
+
+
+plt.clf()
+plt.fill_between(x, np.interp(x, i_cost[i_exp==True],i_value[i_exp==True]-i_cost[i_exp==True]), 
+		np.interp(x, c_cost[c_exp==True], c_value[c_exp==True]-c_cost[c_exp==True]), 
+		color='none', hatch='/', edgecolor=[.3,.3,.3,.5], linewidth=0.0)
+plt.fill_between(x, np.interp(x, c_cost[c_exp==True],x_value[c_exp==True]-c_cost[c_exp==True]), 
+		np.interp(x, i_cost[i_exp==True], i_value[i_exp==True]-i_cost[i_exp==True]), 
+		color='none', hatch='\\', edgecolor=[1,.3,.3,.5], linewidth=0.0)
+plt.plot(i_cost[i_exp==True], i_value[i_exp==True]-i_cost[i_exp==True], '-k')
+plt.plot(c_cost[c_exp==True], c_value[c_exp==True]-c_cost[c_exp==True], '--k')
+plt.plot(c_cost[c_exp==True], x_value[c_exp==True]-c_cost[c_exp==True], '--r')
+
+plt.annotate('Upside Potential of FSS Success', xy=(2600, 4500), size=8, color='k')
+plt.annotate('Downside Risk of FSS Failure', xy=(2300, 1500), xytext=(2600,500), 
+		textcoords='data', arrowprops=dict(arrowstyle='->',connectionstyle='arc3',ec='r'), size=8, color='r')
+
+plt.xlabel('Initial Cost ($\S$)')
+plt.ylabel('24-turn Expected Net Value ($\S$)')
+plt.xlim([1000, 4000])
+plt.ylim([-2000, 10000])
+plt.legend(['Independent Pareto Front ($V_i$)','Centralized Pareto Front, FSS Success ($V_c$)','Centralized Pareto Front, FSS Failure  ($V_x$)'],loc='upper left')
+plt.grid()
+plt.gcf().set_size_inches(6.5, 3.5)
+plt.savefig('2-exp-env.png', bbox_inches='tight', dpi=300)

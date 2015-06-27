@@ -483,12 +483,16 @@ requirejs(['underscore','winston','child_process','minimist','mongojs'], functio
 			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"pSGL","oISL"),
 			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"oSGL","oISL"),
 			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","oISL"),
-			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL")
-		);
-	var runs = _.union(
+			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","oISL"),
 			enumSymmetricPxNSatDesigns(1,[1,2],[1,6],"oSGL","pISL"),
 			enumSymmetricPxNSatDesigns(2,[1,2],[1,5],"oSGL","pISL"),
 			enumSymmetricPxNSatDesigns(3,[1,2],[1,4],"oSGL","pISL")
+		);
+	var runs = _.union(
+			enumSymmetricPxNSatDesigns(4,[1,2],[1,4],"pSGL","pISL"),
+			enumSymmetricPxNSatDesigns(4,[1,2],[1,4],"pSGL","oISL"),
+			enumSymmetricPxNSatDesigns(4,[1,2],[1,4],"oSGL","pISL"),
+			enumSymmetricPxNSatDesigns(4,[1,2],[1,4],"oSGL","oISL")
 		);
 	
 	var start = _.isNumber(argv.start)?argv.start:0;
