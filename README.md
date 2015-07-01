@@ -33,10 +33,12 @@ Also please refer to [node-gyp documentation](https://github.com/TooTallNate/nod
  * `-s` Sets the master random number generator seed. Must be an integer. Default: `-s 0`
  * `-l` Sets the logging level. Select from {none, error, info, verbose, debug}. Default: `-l error`
  * `-p` Sets the number of players. Must be a positive integer. Default: `-p 1`
- * `-o` Sets the federate operational model. Select from {d,s,n} for dynamic (integer program), simple (heuristic), or none. Default: `-o s`
-   * Specify dynamic planning horizon (turns) after `d`, e.g. `h6` for 6 turns. Default: `h6`. 
- * `-f` Sets the federation operational model. Select from {d,n} for dynamic (integer program) or none. Default: `-f n`
-   * Specify dynamic planning horizon (turns) after `d`, e.g. `h6` for 6 turns. Default: `h6`. 
+ * `-o` Sets the federate operational model. Select from {d,s,n} for dynamic time-expanded LP (d), simple heuristic (s), or none. Default: `-o s`
+   * Dynamic time-expanded LP: Specify planning horizon (turns) and optionally storage penalty and ISL penalty (opportunity costs) after `d`, e.g. `d6` for 6 turns, `d6,10,1` for 6 turns with storage penalty 10 and ISL penalty 1. Default: `d6,10,10`. 
+ * `-f` Sets the federation operational model. Select from {d,f,x,n} for dynamic time-expanded LP (d), static LP with fixed cost services LP (f), dynamic time-expanded LP with fixed cost services (x), or none. Default: `-f n`
+   * Dynamic time-expanded LP: Specify planning horizon (turns) and optionally storage penalty and ISL penalty (opportunity costs) after `d`, e.g. `d6` for 6 turns, `d6,10,1` for 6 turns with storage penalty 10 and ISL penalty 1. Default: `d6,10,10`. 
+   * Static LP with fixed cost services: Specify downlink and crosslink costs and optionally storage penalty and ISL penalty (opportunity costs) after `f`, e.g. `f,100,50` for downlink cost 100 and crosslink cost 50, `f,100,50,10,1` for downlink cost 100, crosslink cost 50, storage penalty 10 and ISL penalty 1. Default: `f,50,20,10,10`. 
+   * Dynamic time-expanded LP with fixed cost services: Specify downlink and crosslink costs, planning horizon, and optionally storage penalty and ISL penalty (opportunity costs) after `x`, e.g. `x,100,50,6` for downlink cost 100, crosslink cost 50, and planning horizon 6, `x,100,50,6,10,1` for downlink cost 100, crosslink cost 50, planning horizon 6, storage penalty 10 and ISL penalty 1. Default: `x,50,20,3,10,10`. 
  * `P.SysName@LOC,Sub1,Sub2,SubN` Defines a system controlled by player `P` (positive integer) of system type `SysName`, instantiated at location `LOC` with subsystems `Sub1`, `Sub2`, and `SubN`.
    * Available Systems:
      * `GroundSta`: Ground station with capacity for 3 subsystem modules. Costs 500 to design and 0 to commission on the surface.
