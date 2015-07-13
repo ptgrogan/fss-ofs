@@ -17,7 +17,7 @@
 var requirejs = require('requirejs');
 
 requirejs.config({
-  baseUrl: '../lib',
+  baseUrl: __dirname + '/../lib',
   nodeRequire: require
 });
 
